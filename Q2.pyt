@@ -467,7 +467,7 @@ class Node:
         for i in range(0, 4):
             for j in range(0, 4):
                 if (self.currConfig[i][j] > 0):
-                    white += 8 - self.currConfig[i][j]
+                    white += 1
                 elif (self.opponentConfig[i][j] > 0):
                     #to help favour higher stacks for black
                     black += self.opponentConfig[i][j]
