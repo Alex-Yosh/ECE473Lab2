@@ -1,9 +1,11 @@
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 
 INITALTEMP = 100
-ALPHA = 1
+LOWTEMP = 0.05
+ALPHA = 0.001
 
 
 class Solution:
@@ -28,29 +30,30 @@ def Neightbourhood(solution):
 def RandomSolution():
     return Solution(np.random.uniform(-100, 100), np.random.uniform(-100, 100))
 
-def SA():
-    CurrentSolution = RandomSolution()
+def SA(initalSolution = RandomSolution(), initalTemp = INITALTEMP, lowtemp = LOWTEMP, alpha = ALPHA):
+    CurrentSolution = initalSolution
     BestSolution = CurrentSolution
 
-    temp = INITALTEMP
+    temp = initalTemp
+    solutionProfile = []
 
-    while (temp > 0.05):
-        for _ in range(300):
-            NewSolution = Neightbourhood(CurrentSolution)
-            DeltaCost = NewSolution.cost - CurrentSolution.cost
+    while (temp > lowtemp):
+        NewSolution = Neightbourhood(CurrentSolution)
+        DeltaCost = NewSolution.cost - CurrentSolution.cost
+        solutionProfile.append(BestSolution.cost)
             
-            if (DeltaCost > 0):
+        if (DeltaCost > 0):
+            CurrentSolution = NewSolution
+        else:
+            x = random.random()
+            if (x < np.exp(-DeltaCost/temp)):
                 CurrentSolution = NewSolution
-            else:
-                x = random.random()
-                if (x < np.exp(-DeltaCost/temp)):
-                    CurrentSolution = NewSolution
 
-            if CurrentSolution.cost < BestSolution.cost:
-                BestSolution = CurrentSolution
+        if CurrentSolution.cost < BestSolution.cost:
+            BestSolution = CurrentSolution
 
         #linear
-        temp -= ALPHA
+        temp -= alpha
 
         #Geo
         # temp *= ALPHA
@@ -58,9 +61,63 @@ def SA():
         #Slow
         # temp = temp/(1 + (BETA*temp))
 
-    return BestSolution
+    return BestSolution, solutionProfile
 
-bestSolution= SA()
-print("best solution is (" + str(bestSolution.x1) + " ," +  str(bestSolution.x2) + ")")
-print("best cost is " + str(bestSolution.cost))
 
+bestSolution, _ = SA()
+print("best solution is (" + str(bestSolution.x1) + ", " + str(bestSolution.x2) + ") and the cost was" + str(bestSolution.cost))
+
+
+# first experiment
+initalSolutions = []
+results = []
+for i in range(10):
+    initalSolution = RandomSolution()
+    initalSolutions.append(initalSolution)
+    _, history = SA(initalSolution = initalSolution)
+    results.append(history)
+
+for i, history in enumerate(results):
+    plt.plot(history, label=f'Initial point ({round(initalSolutions[i].x1, 2)}, {round(initalSolutions[i].x2, 2)})')
+plt.title('Solution Profile vs Different Initial Points')
+plt.xlabel('Iteration')
+plt.ylabel('Solution Cost')
+plt.legend()
+plt.grid()
+plt.show()
+
+#second experiment
+initalTemps = []
+results = []
+for i in range(10):
+    initalTemp = random.randint(50, 150)
+    initalTemps.append(initalTemp)
+    _, history = SA(initalTemp=initalTemp)
+    results.append(history)
+
+for i, history in enumerate(results):
+    plt.plot(history, label=f'Initial Temp: {initalTemps[i]}')
+plt.title('Solution Profile vs Different Initial Temps')
+plt.xlabel('Iteration')
+plt.ylabel('Solution Cost')
+plt.legend()
+plt.grid()
+plt.show()
+
+#third experiment
+initalAlphas = []
+results = []
+for i in range(10):
+    alpha = random.uniform(0.0005, 0.002)
+    initalAlphas.append(alpha)
+    _, history = SA(alpha=alpha)
+    results.append(history)
+
+for i, history in enumerate(results):
+    plt.plot(history, label=f'alpha: {round(initalAlphas[i], 4)}')
+plt.title('Solution Profile vs Different Alphas')
+plt.xlabel('Iteration')
+plt.ylabel('Solution Cost')
+plt.legend()
+plt.grid()
+plt.show()
