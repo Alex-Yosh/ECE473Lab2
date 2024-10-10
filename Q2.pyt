@@ -3,7 +3,7 @@ import copy
 import random
 
 class Node:
-    def __init__(self, currentStones, oppStone, oppTurn: bool, depth, alpha = float('-inf'), beta = float('inf'), minimax = True, depthLimit = 3):
+    def __init__(self, currentStones, oppStone, oppTurn = False, depth = 1, alpha = float('-inf'), beta = float('inf'), pruning = True, depthLimit = 3, evaluate = True):
         # self.value = value  # The value of the node
         self.currConfig = currentStones
         self.opponentConfig = oppStone
@@ -11,19 +11,22 @@ class Node:
         self.oppTurn = oppTurn
         self.alpha = alpha
         self.beta = beta
+        self.evalate = evaluate
         self.depthLimit = depthLimit
-        if (minimax):
+        self.explored = 0
+        if evaluate:
             self.evalation = self.EvaluationFunction()
+            
 
-        if (depth < depthLimit+1 and minimax):
-            self.nextNodes = self.AllNextMinimaxNodes(self.currConfig, self.opponentConfig, self.oppTurn, self.depth)
-        
-        if (depth == 1 and not minimax):
-            self.nextNodes = self.AllNextNodes(self.currConfig, self.opponentConfig, self.oppTurn, self.depth)
+        if (depth < depthLimit+1):
+            if pruning:
+                self.nextNodes = self. NextNodesNotPruned(self.currConfig, self.opponentConfig, self.oppTurn, self.depth)
+            else:
+                self.nextNodes = self.AllNextNodes(self.currConfig, self.opponentConfig, self.oppTurn, self.depth)
 
 
     #applys alpha-beta proning
-    def AllNextMinimaxNodes(self, currentStones, oppStones, oppTurn: bool, depth):
+    def  NextNodesNotPruned(self, currentStones, oppStones, oppTurn: bool, depth):
         moves = []
         for i in range(0, 4):
             for j in range(0, 4):
@@ -33,56 +36,56 @@ class Node:
                         continue
                     
                     if (self.MoveLeft(oppStones, currentStones, i, j) != None):
-                        n = Node(currentStones, self.MoveLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(currentStones, self.MoveLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveRight(oppStones, currentStones, i, j) != None):
-                        n = Node(currentStones, self.MoveRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(currentStones, self.MoveRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveUp(oppStones, currentStones, i, j) != None):
-                        n = Node(currentStones, self.MoveUp(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(currentStones, self.MoveUp(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveDown(oppStones, currentStones, i, j) != None):
-                        n = Node(currentStones, self.MoveDown(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(currentStones, self.MoveDown(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveDownLeft(oppStones, currentStones, i, j) != None):
-                        n = Node(currentStones, self.MoveDownLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(currentStones, self.MoveDownLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveDownRight(oppStones, currentStones, i, j) != None):
-                        n = Node(currentStones, self.MoveDownRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(currentStones, self.MoveDownRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveUpLeft(oppStones, currentStones, i, j) != None):
-                        n = Node(currentStones, self.MoveUpLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(currentStones, self.MoveUpLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveUpRight(oppStones, currentStones, i, j) != None):
-                        n = Node(currentStones, self.MoveUpRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(currentStones, self.MoveUpRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
@@ -95,63 +98,74 @@ class Node:
                         continue
 
                     if (self.MoveLeft(currentStones, oppStones, i, j) != None):
-                        n = Node(self.MoveLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(self.MoveLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveRight(currentStones, oppStones, i, j) != None):
-                        n = Node(self.MoveRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(self.MoveRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveUp(currentStones, oppStones, i, j) != None):
-                        n = Node(self.MoveUp(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(self.MoveUp(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveDown(currentStones, oppStones, i, j) != None):
-                        n = Node(self.MoveDown(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(self.MoveDown(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveUpLeft(currentStones, oppStones, i, j) != None):
-                        n = Node(self.MoveUpLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(self.MoveUpLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveUpRight(currentStones, oppStones, i, j) != None):
-                        n = Node(self.MoveUpRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(self.MoveUpRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveDownLeft(currentStones, oppStones, i, j) != None):
-                        n = Node(self.MoveDownLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(self.MoveDownLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
 
                     if (self.MoveDownRight(currentStones, oppStones, i, j) != None):
-                        n = Node(self.MoveDownRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit)
+                        n = Node(self.MoveDownRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, depthLimit=self.depthLimit, evaluate= self.evalate)
                         if (self.ShouldPrune(n)):
                             return moves
                         else:
                             moves.append(n)
+        
+        # track number of nodes expored
+        if self.depth == self.depthLimit:
+            self.explored = len(moves)
+        else:
+            for move in moves:
+                self.explored += move.explored
+            self.explored += len(moves)
+            if depth == 1:
+                self.explored += 1
+
         return moves
 
-    #get random moves
+    #does not alpha-beta proning
     def AllNextNodes(self, currentStones, oppStones, oppTurn: bool, depth):
         moves = []
         for i in range(0, 4):
@@ -162,28 +176,28 @@ class Node:
                         continue
                     
                     if (self.MoveLeft(oppStones, currentStones, i, j) != None):
-                        moves.append(Node(currentStones, self.MoveLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(currentStones, self.MoveLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveRight(oppStones, currentStones, i, j) != None):
-                        moves.append(Node(currentStones, self.MoveRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(currentStones, self.MoveRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveUp(oppStones, currentStones, i, j) != None):
-                        moves.append(Node(currentStones, self.MoveUp(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(currentStones, self.MoveUp(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveDown(oppStones, currentStones, i, j) != None):
-                        moves.append(Node(currentStones, self.MoveDown(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(currentStones, self.MoveDown(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveDownLeft(oppStones, currentStones, i, j) != None):
-                        moves.append(Node(currentStones, self.MoveDownLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(currentStones, self.MoveDownLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveDownRight(oppStones, currentStones, i, j) != None):
-                        moves.append(Node(currentStones, self.MoveDownRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(currentStones, self.MoveDownRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveUpLeft(oppStones, currentStones, i, j) != None):
-                        moves.append(Node(currentStones, self.MoveUpLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(currentStones, self.MoveUpLeft(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveUpRight(oppStones, currentStones, i, j) != None):
-                        moves.append(Node(currentStones, self.MoveUpRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(currentStones, self.MoveUpRight(oppStones, currentStones, i, j), not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     
                 else:
@@ -192,28 +206,47 @@ class Node:
                         continue
 
                     if (self.MoveLeft(currentStones, oppStones, i, j) != None):
-                        moves.append(Node(self.MoveLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(self.MoveLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveRight(currentStones, oppStones, i, j) != None):
-                        moves.append(Node(self.MoveRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(self.MoveRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveUp(currentStones, oppStones, i, j) != None):
-                        moves.append(Node(self.MoveUp(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(self.MoveUp(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveDown(currentStones, oppStones, i, j) != None):
-                        moves.append(Node(self.MoveDown(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(self.MoveDown(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveUpLeft(currentStones, oppStones, i, j) != None):
-                        moves.append(Node(self.MoveUpLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(self.MoveUpLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveUpRight(currentStones, oppStones, i, j) != None):
-                        moves.append(Node(self.MoveUpRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(self.MoveUpRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveDownLeft(currentStones, oppStones, i, j) != None):
-                        moves.append(Node(self.MoveDownLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(self.MoveDownLeft(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
 
                     if (self.MoveDownRight(currentStones, oppStones, i, j) != None):
-                        moves.append(Node(self.MoveDownRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, minimax=False))
+                        moves.append(Node(self.MoveDownRight(currentStones, oppStones, i, j), oppStones, not oppTurn, depth + 1, self.alpha, self.beta, pruning=False, depthLimit= self.depthLimit, evaluate= self.evalate))
+        
+        #find best next move
+        if (self.evalate):
+            bestEval = float('-inf')
+            for move in moves:
+                if (move.evalation > bestEval):
+                    bestEval = move.evalation
+                    self.bestNextMove = move.currConfig
+
+        # track number of nodes expored
+        if self.depth == self.depthLimit:
+            self.explored = len(moves)
+        else:
+            for move in moves:
+                self.explored += move.explored
+            self.explored += len(moves)
+            if depth == 1:
+                self.explored += 1
+                
         return moves
     
     def ShouldPrune(self, n):
@@ -450,16 +483,10 @@ class Node:
 
         # return e
 
-        # #Idea 3: # of white moves - # of blacks moves
 
-        # curNode = Node(self.currConfig, self.opponentConfig, oppTurn=False, depth=1, minimax = False)
-        # oppNode = Node(self.opponentConfig, self.currConfig, oppTurn=False, depth=1, minimax = False)
-        # return len(curNode.nextNodes) - len(oppNode.nextNodes)
-
-
-        # #Idea 4: a mix approach
-        curNode = Node(self.currConfig, self.opponentConfig, oppTurn=False, depth=1, minimax = False)
-        oppNode = Node(self.opponentConfig, self.currConfig, oppTurn=False, depth=1, minimax = False)
+        # #Idea 3: a mix approach
+        curNode = Node(self.currConfig, self.opponentConfig, pruning = False, depthLimit= 1, evaluate=False)
+        oppNode = Node(self.opponentConfig, self.currConfig, pruning = False, depthLimit= 1, evaluate=False)
 
         white = 0
         black = 0
@@ -499,26 +526,41 @@ class Player:
 
             
     # given possbile next move, get all terminal values
-    def miniMaxMove(self, otherPlayer, turns):
-        if (turns>20 and turns<30):
-           curNode = Node(self.stones, otherPlayer.stones, False, 1, depthLimit=4)
-        elif(turns>=30 and turns<40):
-           curNode = Node(self.stones, otherPlayer.stones, False, 1, depthLimit=5)
+    def miniMaxMove(self, otherPlayer, turns, pruning:bool, iterativeDeepening: bool = False):
+        s = ""
+        if iterativeDeepening:
+            if (turns>20 and turns<30):
+                curNode = Node(self.stones, otherPlayer.stones, pruning=pruning, depthLimit=4)
+                s += "explored 4 depths "
+            elif(turns>=30 and turns<40):
+                curNode = Node(self.stones, otherPlayer.stones, pruning=pruning, depthLimit=5)
+                s += "explored 5 depths "
+            else:
+                curNode = Node(self.stones, otherPlayer.stones, pruning=pruning, depthLimit=3)
+                s += "explored 4 depths "
         else:
-           curNode = Node(self.stones, otherPlayer.stones, False, 1, depthLimit=3)
+            curNode = Node(self.stones, otherPlayer.stones, pruning=pruning, depthLimit=3)
+            s += "explored 3 depths " 
         
+        if pruning:
+            s += "with pruning"
+        else:
+            s += "without pruning"
+            
+        print(s)
+        print("nodes explored: " + str(curNode.explored) + "\n")
         self.stones = curNode.bestNextMove
 
     #random move
     def randomMove(self, otherPlayer):
-        curNode = Node(self.stones, otherPlayer.stones, False, 1, minimax = False)
+        curNode = Node(self.stones, otherPlayer.stones, pruning = False, depthLimit=1, evaluate=False)
         if (len(curNode.nextNodes) != 0):
             ranNode = random.choice(curNode.nextNodes)
             self.stones = ranNode.currConfig
     
     #has lost
     def hasLost(self, otherPlayer):
-        curNode = Node(self.stones, otherPlayer.stones, False, 1, minimax = False)
+        curNode = Node(self.stones, otherPlayer.stones, pruning = False, depthLimit=1)
         return len(curNode.nextNodes) == 0
 
 #helper functions
@@ -535,24 +577,57 @@ def printBoard(configWhite, configBlack):
             line += " "
         print(line + "\n")
 
-#main code
+
+blackNoPruning = Player(isWhite = False)
+whiteNoPruning = Player()
+
+n = 1
+whiteMove = True
+
+#with pruning
+while(not blackNoPruning.hasLost(whiteNoPruning) and not whiteNoPruning.hasLost(blackNoPruning) and n<40):
+    print("turn " + str(n))
+    n+=1
+
+    if (whiteMove):
+        whiteNoPruning.miniMaxMove(blackNoPruning, n, pruning= False)
+    else:
+        blackNoPruning.randomMove(whiteNoPruning)
+
+    printBoard(whiteNoPruning.stones, blackNoPruning.stones)
+    print("\n")
+    whiteMove = not whiteMove
+
+
+if(n>=40):
+    print("terminated as it took too long")
+else:
+    if (blackNoPruning.hasLost(whiteNoPruning)):
+        print("white wins")
+    else:
+        print("black wins")
+
+
 black = Player(isWhite = False)
 white = Player()
 
 n = 1
 whiteMove = True
+#with pruning
 while(not black.hasLost(white) and not white.hasLost(black) and n<40):
-    print("turn " + str(n))
+    print("turn " + str(n) + "\n")
     n+=1
 
     if (whiteMove):
-        white.miniMaxMove(black, n)
+        white.miniMaxMove(black, n, pruning = True, iterativeDeepening=True)
     else:
         black.randomMove(white)
 
     printBoard(white.stones, black.stones)
     print("\n")
     whiteMove = not whiteMove
+
+
 
 if(n>=40):
     print("terminated as it took too long")
