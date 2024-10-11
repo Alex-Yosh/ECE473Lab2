@@ -20,25 +20,17 @@ with open("./assignment-2-Flow.csv", 'r') as file:
     FlowMatrix.append(row)
 
 
-TABUSIZE = 5
+TABUSIZE = 10
 NUMOFLOCATIONS = 20
 NUMONEIGHBOURSCHOOSEN = 10
 MAXITERATIONS = 1000
 
 def CalculateCost(solution):
-    TotalDistance = 0
-    TotalFlow = 0
+    cost = 0
     for i in range(NUMOFLOCATIONS):
-        #cost = flow * distance
-        if (i == NUMOFLOCATIONS-1):
-            TotalDistance += DistanceMatrix[solution[-1]][solution[0]]
-            TotalFlow += FlowMatrix[-1][0]
-            # print(str(DistanceMatrix[solution[-1]][solution[0]]) + " " + str(FlowMatrix[-1][0]))
-        else:
-            TotalDistance += DistanceMatrix[solution[i]][solution[i + 1]]
-            TotalFlow += FlowMatrix[i][i + 1]
-            # print(str(DistanceMatrix[solution[i]][solution[i + 1]]) + " " + str(FlowMatrix[i][i + 1]))
-    return TotalFlow * TotalDistance
+        for j in range(NUMOFLOCATIONS):
+            cost += FlowMatrix[i][j] * DistanceMatrix[solution[i]][solution[j]]
+    return cost
 
 def CreateRandomInitialSolution():
     #create list from 1 -> 20
@@ -47,9 +39,6 @@ def CreateRandomInitialSolution():
     random.shuffle(solution)
     return solution
 
-# x = [2, 0, 1, 11, 12, 17, 16, 15, 10, 5, 6, 7, 8, 13, 18, 19, 14, 9, 4, 3]
-# print(x)
-# print(CalculateCost(x))
 
 
 def GetNeighborhood(solution):
@@ -84,17 +73,12 @@ def TabuSearch(TabuListSize):
         # sort in order of cost
         neighbors.sort(key=CalculateCost)
 
-        #experiment 5
-        if (interationsWithoutnewBest >= 10):
-            tabu_list = []
         
         foundSolution = False
         for i in range(NUMOFLOCATIONS):
             for j in range(i + 1, NUMOFLOCATIONS):
                 for n in neighbors:
-                    if (n[i], n[j]) not in tabu_list or ((n[i], n[j]) in tabu_list and CalculateCost(n) < BestCost):
-                        #asipration condition
-                        # or (n in tabu_list and CalculateCost(n) < BestCost):
+                    if (n[i], n[j]) not in tabu_list:
                         CurrentSolution = n
                         foundSolution = True
                         tabu_list.append((n[i], n[j]))
@@ -120,15 +104,282 @@ def TabuSearch(TabuListSize):
     return BestSolution, BestCost
 
 
-# for j in range(10):
-# dynamicTabuSize = random.randint(1, 20)
+def TabuSearchExp3():
+    #generate random solution
+    CurrentSolution = CreateRandomInitialSolution()
+    CurrentCost = CalculateCost(CurrentSolution)
+
+    BestSolution = CurrentSolution[:]
+    BestCost = CurrentCost
+
+    tabu_list = []
+
+    TabuListSize = random.randint(1, 20)
+    iterationsTilSwitch = random.randint(5, 30)
+
+    #start looping
+    for l in range(MAXITERATIONS):
+
+        iterationsTilSwitch -=1
+
+
+        if (iterationsTilSwitch == 0):
+            TabuListSize = random.randint(1, 20)
+            iterationsTilSwitch = random.randint(5, 30)
+
+
+        neighbors = GetNeighborhood(BestSolution)
+        
+        # sort in order of cost
+        neighbors.sort(key=CalculateCost)
+
+        
+        foundSolution = False
+        for i in range(NUMOFLOCATIONS):
+            for j in range(i + 1, NUMOFLOCATIONS):
+                for n in neighbors:
+                    if (n[i], n[j]) not in tabu_list or ((n[i], n[j]) in tabu_list and CalculateCost(n) < BestCost):
+                        #asipration condition
+                        CurrentSolution = n
+                        foundSolution = True
+                        tabu_list.append((n[i], n[j]))
+                        break
+                if (foundSolution):
+                    break
+            if (foundSolution):
+                    break
+
+        CurrentCost = CalculateCost(CurrentSolution)
+
+        if CurrentCost < BestCost:
+            BestSolution = CurrentSolution[:]
+            BestCost = CurrentCost
+            interationsWithoutnewBest = 0
+        else:
+            interationsWithoutnewBest += 1
+
+        if len(tabu_list) >= TabuListSize:
+            tabu_list.pop(0) 
+
+
+    return BestSolution, BestCost
+
+def TabuSearchExp4(TabuListSize):
+    #generate random solution
+    CurrentSolution = CreateRandomInitialSolution()
+    CurrentCost = CalculateCost(CurrentSolution)
+
+    BestSolution = CurrentSolution[:]
+    BestCost = CurrentCost
+
+    tabu_list = []
+
+    #start looping
+    for l in range(MAXITERATIONS):
+
+        neighbors = GetNeighborhood(BestSolution)
+        
+        # sort in order of cost
+        neighbors.sort(key=CalculateCost)
+
+        
+        foundSolution = False
+        for i in range(NUMOFLOCATIONS):
+            for j in range(i + 1, NUMOFLOCATIONS):
+                for n in neighbors:
+                    if (n[i], n[j]) not in tabu_list or ((n[i], n[j]) in tabu_list and CalculateCost(n) < BestCost):
+                        #asipration condition
+                        CurrentSolution = n
+                        foundSolution = True
+                        tabu_list.append((n[i], n[j]))
+                        break
+                if (foundSolution):
+                    break
+            if (foundSolution):
+                    break
+
+        CurrentCost = CalculateCost(CurrentSolution)
+
+        if CurrentCost < BestCost:
+            BestSolution = CurrentSolution[:]
+            BestCost = CurrentCost
+            interationsWithoutnewBest = 0
+        else:
+            interationsWithoutnewBest += 1
+
+        if len(tabu_list) >= TabuListSize:
+            tabu_list.pop(0) 
+
+
+    return BestSolution, BestCost
+
+
+def TabuSearchExp5(TabuListSize):
+    #generate random solution
+    CurrentSolution = CreateRandomInitialSolution()
+    CurrentCost = CalculateCost(CurrentSolution)
+
+    BestSolution = CurrentSolution[:]
+    BestCost = CurrentCost
+
+    OverallBestSolution = []
+
+    tabu_list = []
+    
+    interationsWithoutnewBest = 0
+
+    #start looping
+    for l in range(MAXITERATIONS):
+        #experiment 5
+        if (interationsWithoutnewBest >= 10):
+            if OverallBestSolution ==[] or BestCost < CalculateCost(OverallBestSolution):
+                OverallBestSolution = BestSolution
+            
+            #restart search
+            CurrentSolution = CreateRandomInitialSolution()
+            CurrentCost = CalculateCost(CurrentSolution)
+
+            BestSolution = CurrentSolution[:]
+            BestCost = CurrentCost
+
+
+        neighbors = GetNeighborhood(BestSolution)
+        
+        # sort in order of cost
+        neighbors.sort(key=CalculateCost)
+
+        
+        foundSolution = False
+        for i in range(NUMOFLOCATIONS):
+            for j in range(i + 1, NUMOFLOCATIONS):
+                for n in neighbors:
+                    if (n[i], n[j]) not in tabu_list or ((n[i], n[j]) in tabu_list and CalculateCost(n) < BestCost):
+                        CurrentSolution = n
+                        foundSolution = True
+                        tabu_list.append((n[i], n[j]))
+                        break
+                if (foundSolution):
+                    break
+            if (foundSolution):
+                    break
+
+        CurrentCost = CalculateCost(CurrentSolution)
+
+        if CurrentCost < BestCost:
+            BestSolution = CurrentSolution[:]
+            BestCost = CurrentCost
+            interationsWithoutnewBest = 0
+        else:
+            interationsWithoutnewBest += 1
+
+        if len(tabu_list) >= TabuListSize:
+            tabu_list.pop(0) 
+
+
+    return OverallBestSolution, CalculateCost(OverallBestSolution)
+
+
+
+#exp 1
+print("exp 1 \n")
 SumCost = 0
+s = ""
 for i in range(20):
-    # solution, cost = TabuSearch(dynamicTabuSize)
     solution, cost = TabuSearch(TABUSIZE)
-    # print(solution)
-    # print(cost)
     SumCost += cost
+    s += str(cost) + ", "
 print("Tabu size is " + str(TABUSIZE))
+print(s)
 print("average cost is " + str(float(SumCost)/20))
 print("\n")
+
+#exp 2
+print("exp 2 \n")
+SumCost = 0
+size = 1
+s = ""
+for i in range(20):
+    solution, cost = TabuSearch(size)
+    SumCost += cost
+    s += str(cost) + ", "
+print("Tabu size is " + str(size))
+print(s)
+print("average cost is " + str(float(SumCost)/20))
+
+
+SumCost = 0
+size = 5
+s = ""
+for i in range(20):
+    solution, cost = TabuSearch(size)
+    SumCost += cost
+    s += str(cost) + ", "
+print("Tabu size is " + str(size))
+print(s)
+print("average cost is " + str(float(SumCost)/20))
+
+
+SumCost = 0
+size = 15
+s = ""
+for i in range(20):
+    solution, cost = TabuSearch(size)
+    SumCost += cost
+    s += str(cost) + ", "
+print("Tabu size is " + str(size))
+print(s)
+print("average cost is " + str(float(SumCost)/20))
+
+
+SumCost = 0
+size = 20
+s = ""
+for i in range(20):
+    solution, cost = TabuSearch(size)
+    SumCost += cost
+    s += str(cost) + ", "
+print("Tabu size is " + str(size))
+print(s)
+print("average cost is " + str(float(SumCost)/20))
+
+print("\n")
+
+# #exp 3
+print("exp 3 \n")
+SumCost = 0
+s = ""
+for i in range(20):
+    solution, cost = TabuSearchExp3()
+    SumCost += cost
+    s += str(cost) + ", "
+print("Tabu size is Dynamic")
+print(s)
+print("average cost is " + str(float(SumCost)/20))
+print("\n")
+
+# #exp 4
+print("exp 4 \n")
+SumCost = 0
+s = ""
+for i in range(20):
+    solution, cost = TabuSearchExp4(TABUSIZE)
+    SumCost += cost
+    s += str(cost) + ", "
+print("Tabu size is " + str(TABUSIZE))
+print(s)
+print("average cost is " + str(float(SumCost)/20))
+print("\n")
+
+# #exp 5
+print("exp 5 \n")
+SumCost = 0
+s = ""
+for i in range(20):
+    solution, cost = TabuSearchExp5(TABUSIZE)
+    SumCost += cost
+    s += str(cost) + ", "
+print("Tabu size is " + str(TABUSIZE))
+print(s)
+print("average cost is " + str(float(SumCost)/20))
+print("\n")
+
